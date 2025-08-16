@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FI.WebAtividadeEntrevista.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace WebAtividadeEntrevista.Models
     public class ClienteModel
     {
         public long Id { get; set; }
-        
+
         /// <summary>
         /// CEP
         /// </summary>
@@ -72,5 +73,7 @@ namespace WebAtividadeEntrevista.Models
         /// </summary>
         public string CPF { get; set; }
 
-    }    
+        public List<BeneficiarioModel> Beneficiarios { get; set; }
+
+    }
 }
