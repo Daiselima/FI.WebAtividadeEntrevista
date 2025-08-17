@@ -3,8 +3,8 @@ using WebAtividadeEntrevista.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
+using FI.WebAtividadeEntrevista.Models;
 using FI.AtividadeEntrevista.DML;
 
 namespace WebAtividadeEntrevista.Controllers
@@ -58,6 +58,19 @@ namespace WebAtividadeEntrevista.Controllers
             };
 
             model.Id = boCliente.Incluir(cliente);
+
+            if (model.Beneficiarios.Count > 0)
+            {
+                foreach (var beneficiario in model.Beneficiarios)
+                {
+                    new BoBeneficiario().Incluir(new Beneficiario()
+                    {
+                        Nome = beneficiario.Nome,
+                        CPF = beneficiario.CPF,
+                        IdCliente = model.Id
+                    });
+                }
+            }
 
             return Json("Cadastro efetuado com sucesso");
 
@@ -119,7 +132,7 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
                     Telefone = cliente.Telefone,
-                    CPF = model.CPF
+                    CPF = cliente.CPF
                 };
 
 

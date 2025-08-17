@@ -8,6 +8,10 @@
         $(this).val(formatarCPF($(this).val()));
     });
 
+    $('#incluirBeneficiarioModal').on('hidden.bs.modal', function () {
+        $("#CPFBeneficiario, #NomeBeneficiario").val('');
+    });
+
     $("#btnIncluirBeneficiario").click(function (e) {
         e.preventDefault();
 
@@ -19,8 +23,6 @@
             $("#CPFBeneficiario").focus();
             return;
         }
-
-        cpf = cpf.replace(/\D/g, '');
 
         let existe = false;
         $("#listaBeneficiarios tbody tr").each(function () {
@@ -46,66 +48,15 @@
             </tr>
         `);
 
+        cpf = cpf.replace(/\D/g, '');
+
         $("#CPFBeneficiario, #NomeBeneficiario").val('');
-        $("#incluirBeneficiarioModal").modal('hide');
+        $("#CPFBeneficiario").focus();
     });
 
     $(document).on("click", ".btnExcluirBenef", function () {
         $(this).closest("tr").remove();
     });
-
-    $('#formCadastro').submit(function (e) {
-        e.preventDefault();
-
-        let cpfVal = $("#CPF").val();
-        if (!validarCPF(cpfVal)) {
-            ModalDialog("Erro", "CPF do cliente inválido!");
-            $("#CPF").focus();
-            return;
-        }
-        cpfVal = cpfVal.replace(/\D/g, '');
-
-        let beneficiarios = [];
-        $("#listaBeneficiarios tbody tr").each(function () {
-            beneficiarios.push({
-                CPF: $(this).find(".cpfBenef").text(),
-                Nome: $(this).find("td:eq(2)").text()
-            });
-        });
-
-        $.ajax({
-            url: urlPost,
-            method: "POST",
-            data: {
-                NOME: $("#Nome").val(),
-                SOBRENOME: $("#Sobrenome").val(),
-                CPF: cpfVal,
-                CEP: $("#CEP").val(),
-                ESTADO: $("#Estado").val(),
-                CIDADE: $("#Cidade").val(),
-                LOGRADOURO: $("#Logradouro").val(),
-                EMAIL: $("#Email").val(),
-                TELEFONE: $("#Telefone").val(),
-                NACIONALIDADE: $("#Nacionalidade").val(),
-                BENEFICIARIOS: JSON.stringify(beneficiarios)
-            },
-            error: function (r) {
-                if (r.responseJSON && r.responseJSON.mensagem) {
-                    ModalDialog("Ocorreu um erro", r.responseJSON.mensagem);
-                } else if (r.status == 500) {
-                    ModalDialog("Ocorreu um erro", "Ocorreu um erro interno no servidor.");
-                } else {
-                    ModalDialog("Ocorreu um erro", "Não foi possível processar sua solicitação.");
-                }
-            },
-            success: function (r) {
-                ModalDialog("Sucesso!", r);
-                $("#formCadastro")[0].reset();
-                $("#listaBeneficiarios tbody").empty();
-            }
-        });
-    });
-
 });
 
 function formatarCPF(cpf) {

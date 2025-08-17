@@ -17,6 +17,14 @@
 
         cpfVal = cpfVal.replace(/\D/g, '');
 
+        let beneficiarios = [];
+        $("#listaBeneficiarios tbody tr").each(function () {
+            beneficiarios.push({
+                CPF: $(this).find(".cpfBenef").text(),
+                Nome: $(this).find("td:eq(2)").text()
+            });
+        });
+
         $.ajax({
             url: urlPost,
             method: "POST",
@@ -30,7 +38,8 @@
                 "Cidade": $(this).find("#Cidade").val(),
                 "Logradouro": $(this).find("#Logradouro").val(),
                 "Telefone": $(this).find("#Telefone").val(),
-                "CPF": cpfVal
+                "CPF": cpfVal,
+                "Beneficiarios": beneficiarios
             },
             error: function (r) {
                 if (r.responseJSON && r.responseJSON.mensagem) {
@@ -44,6 +53,8 @@
             success: function (r) {
                 ModalDialog("Sucesso!", r)
                 $("#formCadastro")[0].reset();
+                
+                $("#listaBeneficiarios tbody").empty();
             }
         });
     });
