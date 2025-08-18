@@ -1,0 +1,16 @@
+﻿CREATE PROCEDURE FI_SP_ConsBeneficiario
+    @IDCLIENTE BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        ID,
+        NOME,
+        CPF,
+        IDCLIENTE
+    FROM 
+        BENEFICIARIOS
+    WHERE 
+        IDCLIENTE = @IDCLIENTE
+END

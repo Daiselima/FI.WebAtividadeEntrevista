@@ -1,5 +1,4 @@
-﻿
-$(document).ready(function () {
+﻿$(document).ready(function () {
     if (obj) {
         $('#formCadastro #Nome').val(obj.Nome);
         $('#formCadastro #CEP').val(obj.CEP);
@@ -10,12 +9,38 @@ $(document).ready(function () {
         $('#formCadastro #Cidade').val(obj.Cidade);
         $('#formCadastro #Logradouro').val(obj.Logradouro);
         $('#formCadastro #Telefone').val(obj.Telefone);
-        $('#formCadastro #CPF').val(obj.CPF);
+        $('#formCadastro #CPF').val(formatarCPF(obj.CPF));
+    }
+
+    if (obj.Beneficiarios.length > 0) {
+
+        var $tbody = $("#listaBeneficiarios tbody");
+        $tbody.empty();
+        obj.Beneficiarios.forEach(function (benef) {
+            $tbody.append(
+                `<tr data-id="${benef.Id}">
+                    <td></td>
+                    <td class="cpfBenef">${formatarCPF(benef.CPF)}</td>
+                    <td>${benef.Nome}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger btnExcluirBenef">Excluir</button>
+                    </td>
+                </tr>`
+            );
+        });
     }
 
     $('#formCadastro').submit(function (e) {
-        e.preventDefault();
-        
+        e.preventDefault(urlPost);
+
+        let beneficiarios = [];
+        $("#listaBeneficiarios tbody tr").each(function () {
+            beneficiarios.push({
+                CPF: $(this).find(".cpfBenef").text().replace(/\D/g, ''),
+                Nome: $(this).find("td:eq(2)").text()
+            });
+        });
+
         $.ajax({
             url: urlPost,
             method: "POST",
@@ -29,7 +54,8 @@ $(document).ready(function () {
                 "Cidade": $(this).find("#Cidade").val(),
                 "Logradouro": $(this).find("#Logradouro").val(),
                 "Telefone": $(this).find("#Telefone").val(),
-                "CPF": $(this).find("#CPF").val()
+                "CPF": $(this).find("#CPF").val().replace(/\D/g, ''),
+                "Beneficiarios": beneficiarios
             },
             error:
             function (r) {
@@ -41,8 +67,10 @@ $(document).ready(function () {
             success:
             function (r) {
                 ModalDialog("Sucesso!", r)
-                $("#formCadastro")[0].reset();                                
-                window.location.href = urlRetorno;
+                $("#formCadastro")[0].reset();   
+                setTimeout(function () {
+                    window.location.href = urlRetorno
+                }, 2000);
             }
         });
     })
@@ -71,4 +99,11 @@ function ModalDialog(titulo, texto) {
 
     $('body').append(texto);
     $('#' + random).modal('show');
+}
+
+function formatarCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '').slice(0, 11);
+    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/, function (_, p1, p2, p3, p4) {
+        return p4 ? `${p1}.${p2}.${p3}-${p4}` : `${p1}.${p2}.${p3}`;
+    });
 }

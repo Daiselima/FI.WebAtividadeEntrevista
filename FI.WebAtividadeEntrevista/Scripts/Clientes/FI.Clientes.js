@@ -15,12 +15,10 @@
             return;
         }
 
-        cpfVal = cpfVal.replace(/\D/g, '');
-
         let beneficiarios = [];
         $("#listaBeneficiarios tbody tr").each(function () {
             beneficiarios.push({
-                CPF: $(this).find(".cpfBenef").text(),
+                CPF: $(this).find(".cpfBenef").text().replace(/\D/g, ''),
                 Nome: $(this).find("td:eq(2)").text()
             });
         });
@@ -38,7 +36,7 @@
                 "Cidade": $(this).find("#Cidade").val(),
                 "Logradouro": $(this).find("#Logradouro").val(),
                 "Telefone": $(this).find("#Telefone").val(),
-                "CPF": cpfVal,
+                "CPF": $(this).find("#CPF").val().replace(/\D/g, ''),
                 "Beneficiarios": beneficiarios
             },
             error: function (r) {
@@ -53,7 +51,7 @@
             success: function (r) {
                 ModalDialog("Sucesso!", r)
                 $("#formCadastro")[0].reset();
-                
+
                 $("#listaBeneficiarios tbody").empty();
             }
         });

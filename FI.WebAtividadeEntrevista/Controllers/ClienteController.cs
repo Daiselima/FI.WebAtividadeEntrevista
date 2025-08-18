@@ -80,6 +80,7 @@ namespace WebAtividadeEntrevista.Controllers
         public JsonResult Alterar(ClienteModel model)
         {
             BoCliente bo = new BoCliente();
+            BoBeneficiario boBeneficiario = new BoBeneficiario();
 
             if (!this.ModelState.IsValid)
             {
@@ -90,31 +91,48 @@ namespace WebAtividadeEntrevista.Controllers
                 Response.StatusCode = 400;
                 return Json(string.Join(Environment.NewLine, erros));
             }
-            else
-            {
-                bo.Alterar(new Cliente()
-                {
-                    Id = model.Id,
-                    CEP = model.CEP,
-                    Cidade = model.Cidade,
-                    Email = model.Email,
-                    Estado = model.Estado,
-                    Logradouro = model.Logradouro,
-                    Nacionalidade = model.Nacionalidade,
-                    Nome = model.Nome,
-                    Sobrenome = model.Sobrenome,
-                    Telefone = model.Telefone,
-                    CPF = model.CPF
-                });
 
-                return Json("Cadastro alterado com sucesso");
+            bo.Alterar(new Cliente()
+            {
+                Id = model.Id,
+                CEP = model.CEP,
+                Cidade = model.Cidade,
+                Email = model.Email,
+                Estado = model.Estado,
+                Logradouro = model.Logradouro,
+                Nacionalidade = model.Nacionalidade,
+                Nome = model.Nome,
+                Sobrenome = model.Sobrenome,
+                Telefone = model.Telefone,
+                CPF = model.CPF
+            });
+
+            if (model.Beneficiarios.Count > 0)
+            {
+                List<Beneficiario> beneficiariosExistentes = boBeneficiario.ListarPorCliente(model.Id);
+                foreach (var beneficiario in model.Beneficiarios)
+                {
+                    if (!beneficiariosExistentes.Any(b => b.CPF == beneficiario.CPF))
+                    {
+                        boBeneficiario.Incluir(new Beneficiario()
+                        {
+                            Nome = beneficiario.Nome,
+                            CPF = beneficiario.CPF,
+                            IdCliente = model.Id
+                        });
+                    }
+                }
             }
+
+            return Json("Cadastro alterado com sucesso");
+
         }
 
         [HttpGet]
         public ActionResult Alterar(long id)
         {
             BoCliente bo = new BoCliente();
+            BoBeneficiario boBeneficiario = new BoBeneficiario();
             Cliente cliente = bo.Consultar(id);
             Models.ClienteModel model = null;
 
@@ -132,10 +150,16 @@ namespace WebAtividadeEntrevista.Controllers
                     Nome = cliente.Nome,
                     Sobrenome = cliente.Sobrenome,
                     Telefone = cliente.Telefone,
-                    CPF = cliente.CPF
+                    CPF = cliente.CPF,
+                    Beneficiarios = boBeneficiario.ListarPorCliente(cliente.Id)
+                        .Select(b => new BeneficiarioModel
+                        {
+                            Id = b.Id,
+                            CPF = b.CPF,
+                            Nome = b.Nome
+                        })
+                        .ToList()
                 };
-
-
             }
 
             return View(model);
@@ -165,6 +189,22 @@ namespace WebAtividadeEntrevista.Controllers
             catch (Exception ex)
             {
                 return Json(new { Result = "ERROR", Message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ExcluirBeneficiario(long id)
+        {
+            try
+            {
+                BoBeneficiario boBeneficiario = new BoBeneficiario();
+                boBeneficiario.Excluir(id);
+                return Json(new { sucesso = true, mensagem = "Beneficiário excluído com sucesso" });
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                return Json(new { sucesso = false, mensagem = "Erro ao excluir beneficiário" });
             }
         }
     }

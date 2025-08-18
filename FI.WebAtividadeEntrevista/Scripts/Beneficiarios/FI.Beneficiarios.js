@@ -48,15 +48,37 @@
             </tr>
         `);
 
-        cpf = cpf.replace(/\D/g, '');
-
         $("#CPFBeneficiario, #NomeBeneficiario").val('');
         $("#CPFBeneficiario").focus();
     });
 
     $(document).on("click", ".btnExcluirBenef", function () {
-        $(this).closest("tr").remove();
+        var $tr = $(this).closest("tr");
+        var id = $tr.data("id");
+
+        if (id) {
+            $.ajax({
+                url: '/Cliente/ExcluirBeneficiario',
+                method: 'POST',
+                data: { id: id },
+                success: function (result) {
+                    if (result.sucesso) {
+                        $tr.remove();
+                        ModalDialog("Sucesso", result.mensagem);
+                    } else {
+                        ModalDialog("Erro", result.mensagem);
+                    }
+                },
+                error: function () {
+                    ModalDialog("Erro", "Não foi possível excluir o beneficiário");
+                }
+            });
+
+        } else {
+            $tr.remove();
+        }
     });
+
 });
 
 function formatarCPF(cpf) {
